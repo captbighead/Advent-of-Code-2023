@@ -13,6 +13,7 @@ class vector:
         self._y = y
         self._adjacents = set([])
         self._diagonals = set([])
+        self._surrounding = set([])
 
     def distance(self, other):
         """Returns the Manhattan Distance between two vectors"""
@@ -28,10 +29,26 @@ class vector:
     
     @property
     def adjacents(self):
+        """The four vectors directly adjacent along the cardinal directions."""
         if len(self._adjacents) == 0:
             self._adjacents = set([self + uv for uv in vector.UNIT_VECTORS()])
         return self._adjacents
     
+    @property
+    def diagonals(self):
+        """The four vectors adjacent along the diagonal directions."""
+        if len(self._diagonals) == 0:
+            self._diagonals = set([self + uv for uv in vector.DIAG_VECTORS()])
+        return self._diagonals
+    
+    @property
+    def surrounding(self):
+        """The union of adjacents and diagonals."""
+        if len(self._surrounding) == 0:
+            self._surrounding = self.adjacents.union(self.diagonals)
+        return self._surrounding
+
+
     def rotate_cw(self, steps):
         """Rotates the vector clockwise a number of 90-degree steps."""
         if steps % 4 == 0:
@@ -65,13 +82,6 @@ class vector:
             self._x // abs(self._x) if self._x else 0, 
             self._y // abs(self._y) if self._y else 0
         )
-
-    
-    @property
-    def diagonals(self):
-        if len(self._diagonals) == 0:
-            self._diagonals = set([self + uv for uv in vector.DIAG_VECTORS()])
-        return self._diagonals
 
     def __add__(self, other):
         return vector(self._x + other._x, self._y + other._y)
