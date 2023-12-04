@@ -6,6 +6,11 @@ import os
 # Dynamically imports the solution files for the project, provided they exist.
 _SOLUTIONS = {}
 def import_solutions():
+    
+    print("--")
+    print(os.getcwd())
+    print("--")
+    
     global _SOLUTIONS
     for i in range(1, 26):
         if os.path.exists(f"solutions\\day{i}.py"):
