@@ -9,10 +9,10 @@ from collections import deque
 
 try:
 	input_lines = io.read_input_as_lines(21)
+	example_lines = io.read_example_as_lines(21)
 except:
 	input_lines = ["Input Lines Not Found"]
-
-example_lines = ["Example"]
+	example_lines = ["Example"]
 
 def do_part_one_for(lines):
 	pass

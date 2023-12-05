@@ -14,7 +14,11 @@ def import_solutions():
     global _SOLUTIONS
     for i in range(1, 26):
         if os.path.exists(f"solutions\\day{i}.py"):
-            _SOLUTIONS[i] = importlib.import_module(f"solutions.day{i}")
+            try:
+                _SOLUTIONS[i] = importlib.import_module(f"solutions.day{i}")
+            except:
+                print(f"Failed to load the solution for problem {i} due to a sy"
+                      f"ntax error.")
 import_solutions()
 
 def main():
@@ -147,6 +151,7 @@ def generate_solution_files():
                 ln = ln.replace("pass", "\tpass")
                 ln = ln.replace("return", "\treturn")
                 ln = ln.replace("input_lines ", "\tinput_lines ")
+                ln = ln.replace("example_lines ", "\texample_lines ")
                 f.write(ln + "\n")
     print("File generation complete\n")
     
