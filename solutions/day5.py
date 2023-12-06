@@ -14,7 +14,7 @@ except:
 	input_lines = ["Input Lines Not Found"]
 	example_lines = ["Example"]
 
-class almanac:
+class part_one_almanac:
 
 	def __init__(self, almanac_lines) -> None:
 		seed_def = almanac_lines[0]
@@ -61,7 +61,7 @@ class almanac:
 		return transform
 
 def do_part_one_for(lines):
-	elfmanac = almanac(lines)
+	elfmanac = part_one_almanac(lines)
 	best = 999999999999999999
 	for val in elfmanac.seeds:
 		state = "seed"
@@ -70,8 +70,82 @@ def do_part_one_for(lines):
 		best = min(best, val)
 	return best
 
-def do_part_two_for(lines):
-	pass
+class inclusive_range:
+
+	def __init__(self, rmin, rmax) -> None:
+		self.rmin = rmin
+		self.rmax = rmax
+
+def generate_transform_function(dest, ranges):
+	# Sort the (range, offset) tuples in ascending order of range so that we can
+	# then fill in the gaps with their unrepresented ranges and their offset: 0
+	ranges = sorted(ranges, key=lambda tup: tup[0])
+	abs_max = max(ranges, key=lambda tup: tup[0].rmax)
+
+	# Special insertion cases when 0 is not the absolute minimum across all 
+	# ranges and abs_max is not the absolute max across all ranges
+	if ranges[0][0].rmin != 0:
+		old_abs_min = ranges[0][0].rmin
+		ranges.insert(0, (inclusive_range(0, old_abs_min - 1), 0))
+	if ranges[-1][0].rmax < abs_max:
+		old_abs_max = ranges[-1][0].rmax
+		ranges.append((inclusive_range(old_abs_max + 1, abs_max), 0))
+
+	# Now we iterate upwards, finding and filling all gaps
+	idx = 0
+	while False:
+		pass
+
+
+	def transform(range_list):
+		# TODO: Actually write this guy
+		return dest, range_list
+	return transform
+
+def do_part_two_for(defs):
+	# If we created range objects that could handle being split into 
+	# multiple objects, then a range of seeds being checked against the 
+	# seed-to-soil map would become a set of ranges of soils. We could then
+	# process a set of ranges of soils to get a set of ranges of fertilizer,
+	# etc...
+	seed_range_defs = defs[0][7:].split()
+	seed_ranges = []
+	for i in range(len(seed_range_defs)// 2):
+		rmin, rlen = int(seed_range_defs[i*2]), int(seed_range_defs[i*2+1])
+		rmax = rmin + rlen - 1
+		seed_ranges.append(inclusive_range(rmin, rmax))
+	seed_ranges = sorted(seed_ranges, key=lambda r: r.rmin)
+	
+	new_fn = True
+	transform_functions = {}
+	working_fn_data = {}
+	for def_ln in defs[2:]:
+		# Are we starting a new function? 
+		if new_fn:
+			new_fn = False
+			orig, dest = def_ln[:-5].split("-to-")
+			working_fn_data["orig"] = orig
+			working_fn_data["dest"] = dest
+			working_fn_data["rngs"] = []
+			continue
+
+		# Are we *finalizing* the working function?
+		elif def_ln == "":
+			new_fn = True
+			orig = working_fn_data["orig"]
+			dest = working_fn_data["dest"]
+			rngs = working_fn_data["rngs"]
+			transform_functions[orig] = generate_transform_function(dest, rngs)
+			continue
+		
+		# Otherwise, just record the range:
+		dstart, sstart, rlen =  [int(n) for n in def_ln.split()]
+		range_val = inclusive_range(sstart, sstart + rlen - 1)
+		offset = dstart - sstart
+		rngs.append((range_val, offset))
+
+
+
 
 def solve_p1():
 	print(f"PART ONE\n--------\n")
@@ -88,18 +162,19 @@ def solve_p1():
 	print(f"\tThe lowest location number is {results}\n")
 
 def solve_p2():
-	return
 	print(f"PART TWO\n--------\n")
-	print(f"This is the prompt for Part Two of the problem.\n")
+	print(f"The inital seed values given were a ruse! They're actually ranges i"
+	   	  f"n and of themselves (and their ranges are absurdly large, too large"
+		  f" to iterate over). What's the lowest location number *now*?\n")
 
 	results = do_part_two_for(example_lines)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
-	print(f"\tWe expected: <SOLUTION THEY WANT>\n")
+	print(f"\tThe actual lowest location number is {results}")
+	print(f"\tWe expected: 46\n")
 
 	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe actual lowest location number is {results}\n")
 
 def print_header():
 	print("--- DAY 5: If You Give a Seed a Ferilizer ---\n")
