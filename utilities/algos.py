@@ -266,4 +266,7 @@ def print_map(map, translation=lambda x: x, prefix="\t", bounds=40):
 	print()
 	return
 
-
+def erase(string: str, removals) -> str:
+	for rem in removals:
+		string = string.replace(rem, "")
+	return string

@@ -32,9 +32,8 @@ def do_part_one_for(lines):
 	return product
 
 def do_part_two_for(lines):
-	lines = [ln.replace(" ", "") for ln in lines]
-	TIME = int(lines[0].replace("Time:", ""))
-	DIST = int(lines[1].replace("Distance:", ""))
+	TIME = int(algos.erase(lines[0], ["Time:", " "]))
+	DIST = int(algos.erase(lines[1], ["Distance:", " "]))
 	options = TIME + 1
 
 	# count up from 0 until we're winning. 
