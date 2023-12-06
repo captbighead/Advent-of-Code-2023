@@ -76,30 +76,85 @@ class inclusive_range:
 		self.rmin = rmin
 		self.rmax = rmax
 
+	def __repr__(self) -> str:
+		return f"[{self.rmin}, {self.rmax}]"
+
 def generate_transform_function(dest, ranges):
 	# Sort the (range, offset) tuples in ascending order of range so that we can
 	# then fill in the gaps with their unrepresented ranges and their offset: 0
-	ranges = sorted(ranges, key=lambda tup: tup[0])
-	abs_max = max(ranges, key=lambda tup: tup[0].rmax)
+	ranges = sorted(ranges, key=lambda tup: tup[0].rmin)
 
-	# Special insertion cases when 0 is not the absolute minimum across all 
-	# ranges and abs_max is not the absolute max across all ranges
+	# Special insertion case when 0 is not the absolute minimum across ranges 
 	if ranges[0][0].rmin != 0:
 		old_abs_min = ranges[0][0].rmin
 		ranges.insert(0, (inclusive_range(0, old_abs_min - 1), 0))
-	if ranges[-1][0].rmax < abs_max:
-		old_abs_max = ranges[-1][0].rmax
-		ranges.append((inclusive_range(old_abs_max + 1, abs_max), 0))
 
-	# Now we iterate upwards, finding and filling all gaps
-	idx = 0
-	while False:
-		pass
+	# Now we iterate upwards, finding and filling all gaps with ranges that have
+	# an offset of 0. 
+	idx = 2		# Skip the first two, we know they're good. 
+	while idx < len(ranges):
+		range_prv, offset_prv = ranges[idx-1]
+		range_idx, offset_idx = ranges[idx]
+		if range_prv.rmax != range_idx.rmin - 1:
+			midrange = inclusive_range(range_prv.rmax + 1, range_idx.rmin - 1)
+			ranges.insert(idx, (midrange, 0))
+			idx += 2
+		else:
+			idx += 1
 
+	# At this point, 'ranges' is a comprehensive list of ranges with the offests
+	# that get applied to numbers in those ranges. The transform function merely
+	# subdivides out any input ranges into the ranges that would be generated if
+	# put into the output ranges. 
+	out_ranges = ranges
 
 	def transform(range_list):
-		# TODO: Actually write this guy
-		return dest, range_list
+		transformed_ranges = []
+		for in_range in range_list:
+			start_idx = 0
+			while (start_idx < len(out_ranges) and 
+				   in_range.rmin > out_ranges[start_idx][0].rmax):
+				start_idx += 1
+			
+			# If we've gone beyond the end of the out_range list, then the 
+			# offset is 0 for the entire in_range, so we just return it as-is
+			if start_idx >= len(out_ranges):
+				transformed_ranges.append(in_range)
+				continue
+
+			#Otherwise, start translating ranges. 
+			# r_range == "Remaining Range". AKA: The remaining part of the input
+			# range to transform.
+			r_range = in_range
+			idx = start_idx
+			while r_range != None and idx < len(out_ranges):
+				# t_range == "Transformer Range": the range that transforms.
+				t_range, offset = out_ranges[idx]
+
+				# Easiest case: r_range is a subset of the transformer range
+				if r_range.rmax <= t_range.rmax:
+					new_range = inclusive_range(r_range.rmin + offset, 
+								 				r_range.rmax + offset)
+					transformed_ranges.append(new_range)
+					r_range = None
+
+				# Otherwise, we know r_range.rmin is within t_range, so we need
+				# to transform the portion of r_range within t_range, and then
+				# shuffle the remainder of r_range to the next iteration. 
+				else: 
+					new_range = inclusive_range(r_range.rmin + offset, 
+								 				t_range.rmax + offset)
+					transformed_ranges.append(new_range)
+					r_range = inclusive_range(t_range.rmax + 1, r_range.rmax)
+					idx += 1
+			
+			# If any of the range is left over, it's above the end of the 
+			# function's range limit, so it gets an offset of 0 (IE: just add it
+			# to the list of transformed ranges)
+			if r_range != None:
+				transformed_ranges.append(r_range)
+		
+		return (dest, transformed_ranges)
 	return transform
 
 def do_part_two_for(defs):
@@ -117,8 +172,14 @@ def do_part_two_for(defs):
 	seed_ranges = sorted(seed_ranges, key=lambda r: r.rmin)
 	
 	new_fn = True
-	transform_functions = {}
+	transform_fns = {}
 	working_fn_data = {}
+
+	# Function definition happens when an empty line is encountered, but the 
+	# input functions strip trailing empty lines, so the final function won't be
+	# defined unless we append this empty string (or copy code)
+	defs.append("")				
+
 	for def_ln in defs[2:]:
 		# Are we starting a new function? 
 		if new_fn:
@@ -135,14 +196,23 @@ def do_part_two_for(defs):
 			orig = working_fn_data["orig"]
 			dest = working_fn_data["dest"]
 			rngs = working_fn_data["rngs"]
-			transform_functions[orig] = generate_transform_function(dest, rngs)
+			transform_fns[orig] = generate_transform_function(dest, rngs)
 			continue
 		
 		# Otherwise, just record the range:
 		dstart, sstart, rlen =  [int(n) for n in def_ln.split()]
 		range_val = inclusive_range(sstart, sstart + rlen - 1)
 		offset = dstart - sstart
-		rngs.append((range_val, offset))
+		working_fn_data["rngs"].append((range_val, offset))
+	
+	# At this point, transform_fns takes a list of ranges and then transforms it
+	# into a different list of ranges based on the given states. 
+	curr_ranges = seed_ranges
+	curr_state = "seed"
+	while curr_state != "location":
+		curr_state, curr_ranges = transform_fns[curr_state](curr_ranges)
+	curr_ranges = sorted(curr_ranges, key=lambda rng: rng.rmin)
+	return curr_ranges[0].rmin
 
 
 
