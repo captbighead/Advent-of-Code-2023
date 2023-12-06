@@ -37,6 +37,7 @@ def main():
         except ValueError:  # int() failed
             print(f"Please enter a solution index as an integer (1-25, or 0 to "
                   "exit)\n")
+            continue
 
         # When the solution is 0, we terminate.
         if soln == 0:
