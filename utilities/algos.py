@@ -267,6 +267,7 @@ def print_map(map, translation=lambda x: x, prefix="\t", bounds=40):
 	return
 
 def erase(string: str, removals) -> str:
+	"""Removes a list of substrings from a string."""
 	for rem in removals:
 		string = string.replace(rem, "")
 	return string
