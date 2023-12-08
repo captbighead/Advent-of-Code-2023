@@ -65,8 +65,8 @@ class camel_cards_hand_p2:
 		# Here, if there is a J, we convert it into the version of itself that 
 		# would give the best hand:
 		if counts.get("J", False):
-			hstr = self.alias_hand()
-			counts = {c: hstr.count(c) for c in hstr}
+			alias = self.alias_hand()
+			counts = {c: alias.count(c) for c in alias}
 
 		diff_cards = len(counts.keys())
 
@@ -92,7 +92,7 @@ class camel_cards_hand_p2:
 		# Remove them. We can operate off of the new set. 
 		hstr = hstr.replace("J", "")
 		counts = {c: hstr.count(c) for c in hstr}
-		cards_we_have = sorted(list(counts.keys()), key=lambda c: counts[c])
+		cards_we_have = sorted(list(counts.keys()), key=lambda c: counts[c], reverse=True)
 		diff_cards = len(cards_we_have)
 
 		# This is actually so simple but I had to prove it out by iterating 
