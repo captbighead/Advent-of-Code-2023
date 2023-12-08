@@ -1,0 +1,5 @@
+*.pyc
+__pycache__
+solutions/__pycache__
+utilities/__pycache__
+
