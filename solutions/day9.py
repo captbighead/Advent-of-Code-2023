@@ -25,6 +25,9 @@ def extrapolate(sequence_def):
 		for i in range(len(derivatives[-2])-1):
 			derivatives[-1].append(derivatives[-2][i+1] - derivatives[-2][i])
 
+	# Every derivative sequence above the 0, 0, 0, sequence is continued by 
+	# adding the value from the end of the previous sequence to the last value 
+	# in the current sequence.
 	for d in range(-2, 0-len(derivatives)-1, -1):
 		this_layer = derivatives[d]
 		prev_layer = derivatives[d+1]
@@ -33,11 +36,10 @@ def extrapolate(sequence_def):
 	return sequence[-1]
 
 def extrapolate_backwards(sequence_def):
+	# Repeats everything from the previous solution, with a couple minor changes
 	sequence = [int(n) for n in sequence_def.split()]
 	derivatives = [sequence]
 
-	# Generate 'derivative' sequences. (Loosely basing the term off of what I 
-	# remember from calculus)
 	while sum(derivatives[-1]) != 0:
 		derivatives.append([])
 		for i in range(len(derivatives[-2])-1):
@@ -46,8 +48,11 @@ def extrapolate_backwards(sequence_def):
 	for d in range(-2, 0-len(derivatives)-1, -1):
 		this_layer = derivatives[d]
 		prev_layer = derivatives[d+1]
+
+		# Instead of adding and appending, we subtract and prepend
 		derivatives[d].insert(0, this_layer[0] - prev_layer[0])
 
+	# And now we return the first element.
 	return sequence[0]
 
 
@@ -86,4 +91,4 @@ def solve_p2():
 	print(f"\tThe sum of the prior values for each seqence is {results}\n")
 
 def print_header():
-	print("--- DAY 9: <TITLE GOES HERE> ---\n")
+	print("--- DAY 9: Mirage Maintenance ---\n")
