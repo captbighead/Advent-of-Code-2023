@@ -33,7 +33,7 @@ class BlizzardValley:
 			return self.position == self.start
 				
 
-	def __init__(self, init_vs: dict[vector, str]) -> None:
+	def __init__(self, init_vs: "dict[vector, str]") -> None:
 		DIRS = {
 			">": vector.RIGHT(),
 			"<": vector.LEFT(),
@@ -63,22 +63,20 @@ class BlizzardValley:
 			removals = []
 			for b in blizzards:
 				b: BlizzardValley.Blizzard
+				finished = b.move()
 				
+				# Collect the blizzards of the lower period for efficiency
+				if finished:
+					removals.append(b)
 
+				if t in valley[b.position][b.axis]:
+					valley[b.position][b.axis].remove(t)
+			
+			for b in removals:
+				blizzards.remove(b)
+			
+			print()
 
-		
-
-		
-
-
-
-
-	
-	def position_at_tick(self, tick):
-		travelled = self.dir * tick
-		unadj = self.position + travelled
-		unadj.x 
-		return self.position + (scalar * self.dir)
 
 
 def simulate_storm(valley_map, storms):
@@ -124,3 +122,6 @@ def solve_p2():
 	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
 	print(f"\tThe <THING THEY WANT> is {results}\n")
+
+def print_header():
+	print("--- (2022) DAY 24: <TITLE GOES HERE> ---\n")
