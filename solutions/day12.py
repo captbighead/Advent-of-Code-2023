@@ -97,7 +97,42 @@ def do_part_one_for(lines):
 	#return sum(count_arrangements(ln) for ln in lines)
 
 def do_part_two_for(lines):
-	pass
+
+	summation = 0
+	for line in lines:
+		sequence, checksums = line.split()
+
+		sequence += ("?" + sequence) * 4
+		checksums += ("," + checksums) * 4
+
+		sequence = sequence.replace(".", "0").replace("#", "1")
+		
+		#print("SEQUENCE:")
+		
+		checksums = [n for n in checksums.split(",")]
+		options = product("01", repeat=sequence.count("?"))
+
+		re_str = "0*"
+		for n in checksums:
+			re_str += "1{" + str(n) + "}0+"
+		re_str = re_str[:-1] + "*$"
+
+		pattern = re.compile(re_str)
+
+		count = 0
+		for option in options: 
+			seq_copy = sequence
+			for i in range(len(option)):
+				seq_copy = seq_copy.replace("?", option[i], 1)
+
+			if pattern.match(seq_copy):
+				#print(f"\t{seq_copy}")
+				count += 1
+
+		summation += count
+		#print(f"TOTAL OPTIONS: {count}\n")
+
+	return summation
 
 def solve_p1():
 	print(f"PART ONE\n--------\n")
@@ -115,7 +150,6 @@ def solve_p1():
 	print(f"\tThe <THING THEY WANT> is {results}\n")
 
 def solve_p2():
-	return
 	print(f"PART TWO\n--------\n")
 	print(f"This is the prompt for Part Two of the problem.\n")
 
