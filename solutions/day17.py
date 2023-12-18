@@ -14,87 +14,78 @@ try:
 	example_lines = io.read_example_as_lines(17)
 except:
 	input_lines = ["Input Lines Not Found"]
-	example_lines = ["Example"]
-
-class SNode:
-
-	best_visits = defaultdict(lambda: 999999999)
-
-	def __init__(self, posn: vector, running_heat, path, grid) -> None:
-		self.posn = posn
-		self.running_heat = running_heat
-		self.path = path
-		self.grid = grid
-		SNode.best_visits[posn] = min(SNode.best_visits[posn], running_heat)
-
-	def neighbours(self):
-		can_go_straight = True
-		if len(self.path) >= 3:
-			last_3_moves = set(self.path[-3:])
-			can_go_straight = len(last_3_moves) > 1
-		
-		last_dir = self.path[-1] if len(self.path) else vector.RIGHT()
-		options = [last_dir.rotate_ccw(1), last_dir.rotate_cw(1)]
-		if can_go_straight:
-			options.insert(0, last_dir)
-
-		neighbours = []
-		for opt in options:
-			spec = opt + self.posn
-			if SNode.best_visits[spec] < self.running_heat + self.grid[spec]:
-				continue
-			spec_heat = self.running_heat + self.grid[spec]
-			spec_path = self.path.copy()
-			spec_path.append(opt)
-			neighbours.append(SNode(spec, spec_heat, spec_path, self.grid))
-		return neighbours
-		
-
+	example_lines = ["Example"]		
 
 
 def do_part_one_for(lines):
-	df = lambda: 999999999
-	gridmap = algos.vector_map_from_string_list(lines, default_fn=df, 
-											 	interpreter_fn=int)
-	
+	WORST_CASE = sum(int(n) for n in "".join(lines))
+	default = lambda: WORST_CASE
+	grid = algos.vector_map_from_string_list(lines, default, int)
 	orig = vector()
-	dest = vector(len(lines[0]) - 1, len(lines) - 1)
+	goal = max(grid.keys(), key=lambda v: orig.distance(v))
 
-	# Boiler-plate state tracking. 
-	ENTRIES = 0
-	unvisited = set(gridmap.keys())
-	search_queue = []
-	def extend_search_queue(new_nodes):
-		nonlocal ENTRIES, unvisited, search_queue
+	# Can't do dijkstra's because the path with the best cost might not be legal
+	best = WORST_CASE
+	def recursive_dfs(position, heat_loss, path_set, last_three_set):
+		nonlocal WORST_CASE, grid, goal, best
+
+		if len(pre_path) == 999:
+			print("Stack Overflow Reached")
+
+		# Best case scenario would be a straight shot to the goal, where we only
+		# lose one heat per step. If that would result in a worse heat loss than
+		# our best discovered path so far, then this branch is dead. 
+		if heat_loss + position.distance(goal) >= best:
+			return
 		
-		# Assumes we're extending by a list, but can handle extending by a node.
-		if not isinstance(new_nodes, list):
-			new_nodes = [new_nodes]
+		if position == goal:
+			best = min(best, heat_loss)
+			return
 
-		# Including ENTRIES as a tiebreaking value maintains the heap invariant
-		for node in new_nodes:
-			node: SNode
-			search_queue_node = (node.running_heat, ENTRIES, node)
-			heapq.heappush(search_queue, search_queue_node)
-			ENTRIES += 1
+		path_set = path_set.copy()
+		last_move = position - last_three_set[-1] if len(last_three_set) else None
+		last_three_set.append(position)
 
-	# Initializing values
-	extend_search_queue(SNode(orig, 0, [], gridmap))
-
-	# Search the entire space!
-	while len(search_queue):
-		# dist and tiebreaker are needed by the heap for sorting, but not by us
-		dist, tiebreaker, node = heapq.heappop(search_queue)
-		node:SNode
-
-		# Count this as a visit and update our records if we need to. 
-		if node.posn == dest:
-			continue
+		options = vector.UNIT_VECTORS()
+		# We can't go backwards
+		if last_move != None:
+			options.remove(last_move * -1)
 		
-		# If we get here, we need to continue pathfinding.
-		extend_search_queue(node.neighbours())
-	
-	return SNode.best_visits[dest]
+		# If we haven't gone anywhere yet, we can't go left or right
+		else:
+			options.remove(vector.UP())
+			options.remove(vector.LEFT())
+
+		# If we've been to at least 3 destinations, we can't go in the same 
+		# direction for a fourth time in a row. 
+		last_three = None
+		if len(path) > 3:
+			last_three = set([path[i] - path[i-1] for i in range(-1, -4, -1)])
+			if len(last_three) == 1:
+				options.remove(last_move)
+
+		options = sorted(options, key=lambda v: grid[position + v])
+
+		# Now we speculate on pursuing the legal options: 
+		for opt in options: 
+
+			# In either of the following scenarios, we will never get back 
+			# without crossing our tail. 
+			if position.x == goal.x and opt == vector.UP():
+				continue
+			elif position.y == goal.y and opt == vector.LEFT():
+				continue
+
+			spec_pos = position + opt
+			spec_heat = heat_loss + grid[spec_pos]
+			if spec_heat < best and spec_pos not in path:
+				recursive_dfs(spec_pos, spec_heat, path)
+	recursive_dfs(orig, 0, [])
+	return best
+
+
+
+
 			
 
 
@@ -131,4 +122,4 @@ def solve_p2():
 	print(f"\tThe <THING THEY WANT> is {results}\n")
 
 def print_header():
-	print("--- DAY 17: <TITLE GOES HERE> ---\n")
+	print("--- DAY 17: Clumsy Crucible ---\n")
