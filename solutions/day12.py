@@ -7,8 +7,7 @@ import utilities.io as io
 from collections import defaultdict
 from collections import deque
 
-from itertools import product
-import re
+from functools import cache
 
 try:
 	input_lines = io.read_input_as_lines(12)
@@ -17,98 +16,107 @@ except:
 	input_lines = ["Input Lines Not Found"]
 	example_lines = ["Example"]
 
-def count_arrangements(array, counts, pattern):
+@cache
+def arrangements(array, counts):
+	# Base Cases: there are no more counts, or there are no more springs:
 
-	# Base case, we've inserted all of the broken segments. Turn any remaining
-	# unknowns into fixed springs and check against the pattern:
-	if len(counts) == 0:
-		return 1 if pattern.match(array.replace("?", ".")) else 0
+	# We've run out of counts to apply; if there are no more broken springs left
+	# in the array then this was valid, otherwise it was not.  
+	if not counts:
+		return 1 if not array.count("#") else 0
 	
-	# Otherwise, try inserting our next set of broken springs: 
-	arrangements = 0
-	insert_val = counts[0]
-	next_vals = counts[1:] if len(counts) > 0 else []
-	insert_options = [i for i in range(len(array)) if array[i] == "?"]
-	min_spaces_for_next = sum(next_vals)
-	insert_options = insert_options[:len(insert_options) - min_spaces_for_next]
-	for opt in insert_options:
+	# We still have counts but no more string left. 
+	if not array:
+		return 0	
 
-		# Don't try to insert it into a space that's too small for it.
-		if array[opt:opt + insert_val] == "?" * insert_val:
-			prefix = array[:opt].replace("?", ".")
-			inserted = "#" * insert_val
-			suffix = array[opt + insert_val:]	
-			var_array = prefix + inserted + suffix
-			arrangements += count_arrangements(var_array, next_vals, pattern)
+	# Otherwise recurse some more!
+	results = 0
+
+	# If the next space is a fixed spring or an unknown we can try to turn into
+	# a fixed spring, that's one possibility, multiplied by all its subsequent 
+	# other possibilities.
+	if array[0] in ".?":
+		results += arrangements(array[1:], counts)
 	
-	return arrangements
-
+	# If the next space is a broken spring or an unknown we can try to turn into
+	# a broken spring, try and stick the whole next contiguous section in. If it
+	# couldn't be fit in, that's fine. 
+	if array[0] in "#?":
+		to_replace = array[:counts[0]]
+		fits = len(array) >= counts[0]
+		fits = fits and (len(array) == counts[0] or array[counts[0]] != "#")
+		fits = fits and "." not in to_replace
+		if fits:
+			results += arrangements(array[counts[0] + 1:], counts[1:])
+	
+	return results
 
 def do_part_one_for(lines):
 	summation = 0
-	for line in lines:
-		sequence, counts = line.split()
-		counts = [int(n) for n in counts.split(",")]
+	for ln in lines:
+		array, count_str = ln.split()
+		counts = tuple(int(n) for n in count_str.split(","))
+		arrs = arrangements(array, counts)
+		summation += arrs
 
-		# Prune leading known characters
-		while sequence[0] in (".", "#"):
-			if sequence[0] == "#":
-				counts[0] -= 1
-				if counts[0] == 0:
-					counts.pop(0)
-			sequence = sequence[1:]
+		# Print out the arrangements if it's the example case.
+		if len(lines) < 10:
+			print(f"\t{arrs} arrangements for {array} {counts}")
 
-		# Prune trailing known characters
-		while sequence[-1] in (".", "#"):
-			if sequence[-1] == "#":
-				counts[-1] -= 1
-				if counts[-1] == 0:
-					counts.pop()
-			sequence = sequence[:-1]
-
-		# Build a pattern off of what's left.
-		patt_str = "\.*"
-		for c in counts:
-			patt_str += "#{" + str(c) + "}\.+"
-		patt_str = patt_str[:-1] + "*$"
-		pattern = re.compile(patt_str)
-
-		summation += count_arrangements(sequence, counts, pattern)
+	# If we just did the example case then we want a spacer before we return.
+	if len(lines) < 10:
+		print()
 
 	return summation
 
 def do_part_two_for(lines):
 	summation = 0
+	for ln in lines:
+		array, count_str = ln.split()
+		counts = tuple(int(n) for n in count_str.split(","))
+		counts *= 5
+		array += ("?" + array) * 4
+		arrs = arrangements(array, counts)
+		summation += arrs
+
+		if len(lines) < 10:
+			print(f"\t{arrs} arrangements for {array} {counts}")
+	if len(lines) < 10:
+		print()
 	return summation
 
 def solve_p1():
 	print(f"PART ONE\n--------\n")
-	print(f"Given the following arrays of broken springs and their descriptors,"
-	   	  f" we need to find the number of arrangements of undamaged/damaged sp"
-		  f"rings that are possible.\n")
+	print(f"Given lists of fixed and broken springs with some unknown values, w"
+       	  f"hat is the sum of valid arrangements of fixed/broken springs that c"
+		  f"an be substituted for the unknowns?\n")
 
+	print(f"When we do part one for the example input:\n")
 	results = do_part_one_for(example_lines)
-	print(f"When we do part one for the example input:")
-	print(f"\tThe sum of the number of arrangements is {results}")
+	print(f"\tThe number of arrangements of fixed and broken springs is "
+		  f"{results}")
 	print(f"\tWe expected: 21\n")
 
-	results = do_part_one_for(input_lines)
 	print(f"When we do part one for the actual input:")
-	print(f"\tThe The sum of the number of arrangements is {results}\n")
+	results = do_part_one_for(input_lines)
+	print(f"\tThe number of arrangements of fixed and broken springs is "
+		  f"{results}\n")
+	print(f"\tWe expected: 7506 (we've submitted and verified part one)\n")
+
 
 def solve_p2():
-	return
 	print(f"PART TWO\n--------\n")
-	print(f"This is the prompt for Part Two of the problem.\n")
+	print(f"When the lists are 'unfolded' (IE: concatenated to themselves five "
+       	  f"times), how many arrangements are there?\n")
 
-	results = do_part_two_for(example_lines)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
-	print(f"\tWe expected: <SOLUTION THEY WANT>\n")
+	results = do_part_two_for(example_lines)
+	print(f"\tThe number of arrangements for the unfolded array is {results}")
+	print(f"\tWe expected: 525152\n")
 
-	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	results = do_part_two_for(input_lines)
+	print(f"\tThe number of arrangements for the unfolded array is {results}\n")
 
 def print_header():
-	print("--- DAY 12: <TITLE GOES HERE> ---\n")
+	print("--- DAY 12: Hot Springs ---\n")
