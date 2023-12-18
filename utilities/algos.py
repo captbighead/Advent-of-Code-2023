@@ -266,6 +266,26 @@ def print_map(map, translation=lambda x: x, prefix="\t", bounds=40):
 	print()
 	return
 
+def print_map_to_file(map, file_name, translation=lambda x: x):
+	"""Prints map to a file."""
+	all_coords = [v for v in map.keys()]
+	MINX = all_coords[0].x
+	MAXX = all_coords[0].x
+	MINY = all_coords[0].y
+	MAXY = all_coords[0].y
+	for xy in all_coords:
+		MINX = min(MINX, xy.x)
+		MAXX = max(MAXX, xy.x)
+		MINY = min(MINY, xy.y)
+		MAXY = max(MAXY, xy.y)
+
+	with open(f"print_maps\\{file_name}", "w") as f:    
+		for y in range(MINY, MAXY+1):
+			for x in range(MINX, MAXX+1):
+				f.write(f"{translation(map[vector(x,y)])}")
+			f.write("\n")
+		f.write("\n")
+
 def erase(string: str, removals) -> str:
 	"""Removes a list of substrings from a string."""
 	for rem in removals:

@@ -3,3 +3,5 @@ __pycache__
 solutions/__pycache__
 utilities/__pycache__
 inputs/*
+print_maps/day18_p1_ex.txt
+print_maps/day18_p1.txt
