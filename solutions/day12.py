@@ -7,7 +7,7 @@ import utilities.io as io
 from collections import defaultdict
 from collections import deque
 
-from functools import cache
+from functools import lru_cache
 
 try:
 	input_lines = io.read_input_as_lines(12)
@@ -16,7 +16,7 @@ except:
 	input_lines = ["Input Lines Not Found"]
 	example_lines = ["Example"]
 
-@cache
+@lru_cache
 def arrangements(array, counts):
 	# Base Cases: there are no more counts, or there are no more springs:
 
