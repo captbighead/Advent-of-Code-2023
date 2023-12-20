@@ -22,6 +22,21 @@ class Nodule:
 	REGISTRY = {}
 	FINISHED = False
 
+	SORT_INDEX = {
+		'nd': 1024, 'ql': 9, 'gz': 126, 'lg': 16382, 'tr': 9, 'vn': 17, 
+		'kg': 4096, 'sj': 254, 'hf': 4094, 'vv': 67, 'gf': 513, 'zt': 4096, 
+		'bm': 131, 'cp': 66, 'gs': 131, 'sp': 16382, 'bh': 17, 'xb': 33, 
+		'fx': 509, 'gq': 66, 'xp': 131, 'hl': 18, 'sk': 2048, 'mh': 16382, 
+		'sh': 4096, 'jh': 8191, 'gp': 8191, 'xf': 253, 'cv': 35, 'kr': 9, 
+		'xz': 2052, 'fs': 516, 'xm': 2051, 'qf': 259, 'fn': 253, 'kh': 1026, 
+		'vh': 16382, 'mq': 34, 'zn': 62, 'sv': 513, 'lh': 9, 'dl': 17, 
+		'zx': 8195, 'pz': 2052, 'cn': 1026, 'xs': 8191, 'gb': 33, 'zs': 1026
+	}
+
+	UPDATE_ALL = 0
+	UPDATE_DELTA = 1
+	UPDATE_NEVER = 2
+
 	def press_button_nodule(testing_mode=True):
 		Nodule.PULSE_QUEUE.append(("broadcaster", False, "button"))
 		while Nodule.PULSE_QUEUE:
@@ -46,6 +61,101 @@ class Nodule:
 		Nodule.LOW_SIGNALS = 0
 		Nodule.PULSE_QUEUE = deque()
 		Nodule.REGISTRY = {}
+
+	def print_state_overkill(update_mode: int):
+		ff_header = ""
+		ff_readout = ""
+		conjunction_readouts = {}
+
+		relevant_flipflops = set()
+		for nodule in Nodule.REGISTRY.values():
+			if isinstance(nodule, Conjunction):
+				rels = set(nodule.incoming_connections.keys())
+				relevant_flipflops = relevant_flipflops.union(rels)
+
+		# Build notes from the registry on the state of all of the flipflops and
+		# conjunctions. The row of flipflops is printed as-is, whereas 
+		# conjunctions are merged to one line, so we need to know their whole
+		# deal first.
+		for k in Nodule.REGISTRY.keys():
+			if isinstance(Nodule.REGISTRY[k], FlipFlip):
+				if k in relevant_flipflops:
+					ff_header += f"|{k} "
+					ff_readout += f"| {1 if Nodule.REGISTRY[k].state else 0} "
+
+			if isinstance(Nodule.REGISTRY[k], Conjunction):
+				conj = Nodule.REGISTRY[k]
+				conj: Conjunction
+
+				conj_header = f"|{k} "
+				conj_nm_line = ""
+				conj_readout = ""
+				first = True
+
+				for inc_nm, inc_bit in conj.incoming_connections.items():
+					if not first: 
+						conj_header += "    "
+					first = False
+					conj_nm_line += f"|{inc_nm} "
+					conj_readout += f"| {1 if inc_bit else 0} "
+
+				conj_header += "|"
+				conj_nm_line += "|"
+				conj_readout += "|"
+				conj_div = "-" * len(conj_header)
+				conj_ro_width = len(conj_header)
+				conj_lines = [conj_header, conj_nm_line, conj_readout, conj_div]
+
+				conjunction_readouts[k, conj_ro_width] = conj_lines
+		
+		# Since we can show all the flip-flops at once, we can go ahead and 
+		# enqueue them. 
+		ff_header += "|"
+		ff_readout += "|"
+		ff_div = "-" * len(ff_header)
+		print_queue = [ff_div, ff_header, ff_div, ff_readout, ff_div, ""]
+
+		# Combine Conjunction data on the same line if possible, up the length 
+		# of the flipflop readout. 
+		conj_queue = sorted(conjunction_readouts.keys(), key=lambda cl: cl[1])
+		conj_queue.reverse()
+		while conj_queue:
+			cnm, clen = conj_queue.pop()
+			comb_len = clen
+			cnms = [(cnm, clen)]
+			try:
+				grab_another = comb_len + conj_queue[-1][1] + 1 < len(ff_header)
+			except: 
+				grab_another = False
+			while len(conj_queue) and grab_another:
+				next_cnm, next_clen = conj_queue.pop()
+				cnms.append((next_cnm, next_clen))
+				comb_len += next_clen + 1
+				try:
+					grab_another = comb_len + conj_queue[-1][1] + 1 < len(ff_header)
+				except: 
+					grab_another = False
+
+			agg_ch = ""
+			agg_cn = ""
+			agg_cr = ""
+			aggd = ""
+			for key in cnms:
+				c_h, c_n, c_r, c_d = conjunction_readouts[key]
+				agg_ch += f"{c_h} "
+				agg_cn += f"{c_n} "
+				agg_cr += f"{c_r} "
+				aggd += f"{c_d} "
+			
+			print_queue.extend([aggd, agg_ch, aggd, agg_cn, aggd, agg_cr, aggd])
+			print_queue.append("")
+			
+		for ln in print_queue:
+			print(ln)
+		print()
+
+		if update_mode == Nodule.UPDATE_ALL:
+			input()
 
 	def __init__(self, def_str: str) -> None:
 		def_str = algos.erase(def_str, "%&")
@@ -82,6 +192,9 @@ class FlipFlip(Nodule):
 			self.state = not self.state
 			for target in self.targets:
 				Nodule.PULSE_QUEUE.append((target, self.state, self.name))
+	
+	def str_state(self):
+		return "1" if self.state else "0"
 
 class Conjunction(Nodule):
 
@@ -97,6 +210,7 @@ class Conjunction(Nodule):
 		super().input(signal, last_name)
 		self.incoming_connections[last_name] = signal
 		out = not all(self.incoming_connections.values())
+
 		for target in self.targets:
 			Nodule.PULSE_QUEUE.append((target, out, self.name))
 
@@ -106,6 +220,13 @@ class Conjunction(Nodule):
 			if self.name in nodule.targets:
 				self.incoming_connections[nodule.name] = False
 		self.finalized = True
+
+	def str_state(self):
+		my_str_state = ""
+		sortkey = lambda n: Nodule.SORT_INDEX.get(n, -1)
+		for inc in sorted(self.incoming_connections.keys(), key=sortkey):
+			my_str_state += Nodule.REGISTRY[inc].str_state()
+		return f"{my_str_state}"
 
 
 def do_part_one_for(lines):
@@ -131,22 +252,84 @@ def do_part_one_for(lines):
 def do_part_two_for(lines):
 	Nodule.reset_static_state()
 
-	to_finalize = []
+	flipflops = []
+	conjunctions = []
 	for definition in lines:
 		if definition[0] == "b":
 			Broadcaster(definition)
 		elif definition[0] == "%":
-			FlipFlip(definition)
+			flipflops.append(FlipFlip(definition))
 		elif definition[0] == "&":
-			to_finalize.append(Conjunction(definition))
+			conjunctions.append(Conjunction(definition))
 
-	for conj in to_finalize:
+	for conj in conjunctions:
 		conj.finalize()
 
+	untargeted = set(Nodule.REGISTRY.keys())
+	for n in Nodule.REGISTRY.values():
+		n: Nodule
+		for t in n.targets:
+			if t in untargeted:
+				untargeted.remove(t)
+	print()
+
+
+
+	watchlist = [
+		#"bq", 						# The Big Boy: actually flips rx
+		"vg", "kp", "gc", "tx",		# The consolidated conjs that flip bq
+		#"lx", "db", "qz", "sd", 	# The Conjs that flip the conjs that flip bq
+	]
+
+	last_state = {n.name: n.state for n in flipflops}
+	change_monitor = {n.name: [0] for n in flipflops}
+
 	presses = 0
+
 	while not Nodule.FINISHED:
 		Nodule.press_button_nodule(False)
 		presses += 1
+
+		this_state = {n.name: n.state for n in flipflops}
+		for nm in change_monitor.keys():
+			if this_state[nm] != last_state[nm] and this_state[nm]:
+				change_monitor[nm].append(presses)
+		last_state = this_state
+		
+		if presses < 16384 and presses not in (12001, 12002, 12000):
+			continue
+		
+		print(str(presses) + " " + Nodule.REGISTRY["qz"].str_state())
+
+		change_derivatives = {}
+		sortkey = lambda n: Nodule.SORT_INDEX[n]
+		for flipflop_name in sorted(Nodule.SORT_INDEX.keys(), key=sortkey):
+			change_presses = change_monitor[flipflop_name]
+			delta_presses = []
+			for i, press_num in enumerate(change_presses[1:]):
+				delta_presses.append(press_num - change_presses[i])
+			change_derivatives[flipflop_name] = delta_presses
+		
+		derivatives_by_conj_name = {}
+		for c in conjunctions:
+			derivatives_by_conj_name[c.name] = []
+			c: Conjunction
+			for i in c.incoming_connections:
+				if i in change_derivatives.keys():
+					derivatives_by_conj_name[c.name].append(change_derivatives[i])
+		quadlooopps = 1
+			
+		# qz (highest bit) is on at n % 4001 = 2048
+		# db (highest bit) is on at n % 3929 = 2048
+		# sd (highest bit) is on at n % 3769 = 204
+		# lx (highest bit) is on at n % 4027 = 2048
+
+
+		#Nodule.print_state_overkill(Nodule.UPDATE_ALL)
+
+
+
+
 	
 	return presses
 
