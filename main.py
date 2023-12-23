@@ -27,7 +27,7 @@ def main():
         try:
             soln = int(input("Choose a day to solve: "))
             print()
-            if soln not in (0, -1, -2) and soln not in _SOLUTIONS.keys():
+            if soln not in (0,-1,-2,-3,-4) and soln not in _SOLUTIONS.keys():
                 raise LookupError
             
         except LookupError: # No such solution 
@@ -52,6 +52,18 @@ def main():
         # you can live update a solution.
         if soln == -2:
             reload_solutions()
+            continue
+
+        # -3 is a secret option to run a profiler over a given problem and 
+        # assess it's performance. 
+        if soln == -3: 
+            print("Remember to get this from the other main file...")
+            #profile_solution()
+            continue
+
+        # -4 generates blank input files to be saved over. 
+        if soln == -4:
+            generate_blank_input_files()
             continue
             
         start_time = time.time()
@@ -79,6 +91,25 @@ def reload_solutions():
 
         # No provision is made for if the solution doesn't exist anymore. 
     print("Reload complete\n")
+
+def generate_blank_input_files():
+    """Generates new/refreshes stale solution files from the day0 template."""
+    
+    # Iterate over the input files for all problems and generate any that are 
+    # missing.
+    print("Creating blank input files for all of the problems:")
+    for i in range(1,26):
+        if os.path.exists(f"inputs\\day{i}.txt"):
+            continue
+        else:
+            with open(f"inputs\\day{i}.txt", "w") as f:
+                f.write("This is a blank input file (to be saved over)")
+
+        if os.path.exists(f"inputs\\day{i}_ex.txt"):
+            continue
+        else:
+            with open(f"inputs\\day{i}_ex.txt", "w") as f:
+                f.write("This is a blank example input file (to be saved over)")
 
 def generate_solution_files():
     """Generates new/refreshes stale solution files from the day0 template."""
