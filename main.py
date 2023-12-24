@@ -1,5 +1,6 @@
 import utilities.io     as io 
 import importlib
+import cProfile
 import time
 import os
 
@@ -57,8 +58,7 @@ def main():
         # -3 is a secret option to run a profiler over a given problem and 
         # assess it's performance. 
         if soln == -3: 
-            print("Remember to get this from the other main file...")
-            #profile_solution()
+            profile_solution()
             continue
 
         # -4 generates blank input files to be saved over. 
@@ -110,6 +110,25 @@ def generate_blank_input_files():
         else:
             with open(f"inputs\\day{i}_ex.txt", "w") as f:
                 f.write("This is a blank example input file (to be saved over)")
+
+def profile_solution():
+    print()
+    problem = input("Choose a problem to profile: ")
+    while not problem.isdigit() or int(problem) not in _SOLUTIONS.keys():
+        problem = input(f"{problem} is an invalid problem to solve. Choose a pr"
+                        f"oblem to profile: ")
+    problem = int(problem)
+    
+    part = input(f"Choose which part of problem {problem} to solve: ")
+    while part not in "12":
+        part = input(f"{part} is invalid. Choose a part (1, 2): ")
+    part = int(part)
+
+    profiler = cProfile.Profile()
+    run_str = f"_SOLUTIONS[{problem}].solve_p{part}()"
+    profiler.runctx(run_str, globals(), locals())
+    profiler.print_stats(sort="tottime")
+
 
 def generate_solution_files():
     """Generates new/refreshes stale solution files from the day0 template."""
