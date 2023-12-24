@@ -210,6 +210,19 @@ def prime_factorize(n):
 	return factors
 
 
+def least_common_multiple(numbers):
+	"""Finds the least common multiple of a set of numbers."""
+	common_prime_factors = defaultdict(int)
+	for n in numbers:
+		n_prime_factors = prime_factorize(n)
+		for b, e in n_prime_factors:
+			common_prime_factors[b] = max(common_prime_factors[b], e)
+			
+	LCM = 1
+	for f in common_prime_factors.keys():
+		LCM *= f ** common_prime_factors[f]
+	return LCM
+
 def print_map(map, translation=lambda x: x, prefix="\t", bounds=40):
 	"""Prints a dictionary to a screen for debugging/display purposes.
 

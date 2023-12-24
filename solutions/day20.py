@@ -202,6 +202,7 @@ class Conjunction(Nodule):
 		super().__init__(def_str)
 		self.finalized = False
 		self.incoming_connections = {}
+		self.has_been_tripped = False
 	
 	def input(self, signal, last_name) -> None:
 		if not self.finalized:
@@ -210,6 +211,9 @@ class Conjunction(Nodule):
 		super().input(signal, last_name)
 		self.incoming_connections[last_name] = signal
 		out = not all(self.incoming_connections.values())
+
+		if not out:
+			self.has_been_tripped = True
 
 		for target in self.targets:
 			Nodule.PULSE_QUEUE.append((target, out, self.name))
@@ -262,76 +266,28 @@ def do_part_two_for(lines):
 		elif definition[0] == "&":
 			conjunctions.append(Conjunction(definition))
 
+	watch_list = {}
 	for conj in conjunctions:
 		conj.finalize()
-
-	untargeted = set(Nodule.REGISTRY.keys())
-	for n in Nodule.REGISTRY.values():
-		n: Nodule
-		for t in n.targets:
-			if t in untargeted:
-				untargeted.remove(t)
-	print()
-
-
-
-	watchlist = [
-		#"bq", 						# The Big Boy: actually flips rx
-		"vg", "kp", "gc", "tx",		# The consolidated conjs that flip bq
-		#"lx", "db", "qz", "sd", 	# The Conjs that flip the conjs that flip bq
-	]
-
-	last_state = {n.name: n.state for n in flipflops}
-	change_monitor = {n.name: [0] for n in flipflops}
-
+		if conj.name in ("lx", "db", "qz", "sd"):
+			watch_list[conj] = False
+	
 	presses = 0
-
 	while not Nodule.FINISHED:
 		Nodule.press_button_nodule(False)
 		presses += 1
 
-		this_state = {n.name: n.state for n in flipflops}
-		for nm in change_monitor.keys():
-			if this_state[nm] != last_state[nm] and this_state[nm]:
-				change_monitor[nm].append(presses)
-		last_state = this_state
-		
-		if presses < 16384 and presses not in (12001, 12002, 12000):
-			continue
-		
-		print(str(presses) + " " + Nodule.REGISTRY["qz"].str_state())
-
-		change_derivatives = {}
-		sortkey = lambda n: Nodule.SORT_INDEX[n]
-		for flipflop_name in sorted(Nodule.SORT_INDEX.keys(), key=sortkey):
-			change_presses = change_monitor[flipflop_name]
-			delta_presses = []
-			for i, press_num in enumerate(change_presses[1:]):
-				delta_presses.append(press_num - change_presses[i])
-			change_derivatives[flipflop_name] = delta_presses
-		
-		derivatives_by_conj_name = {}
-		for c in conjunctions:
-			derivatives_by_conj_name[c.name] = []
-			c: Conjunction
-			for i in c.incoming_connections:
-				if i in change_derivatives.keys():
-					derivatives_by_conj_name[c.name].append(change_derivatives[i])
-		quadlooopps = 1
-			
-		# qz (highest bit) is on at n % 4001 = 2048
-		# db (highest bit) is on at n % 3929 = 2048
-		# sd (highest bit) is on at n % 3769 = 204
-		# lx (highest bit) is on at n % 4027 = 2048
-
-
-		#Nodule.print_state_overkill(Nodule.UPDATE_ALL)
-
-
-
-
+		for conj in watch_list:
+			if not watch_list[conj] and conj.has_been_tripped:
+				watch_list[conj] = presses
+		if all(watch_list.values()):
+			prod = 1
+			for v in watch_list.values():
+				prod *= v
+			return prod
 	
-	return presses
+	raise LookupError("Somehow, this function finished without finding the answ"
+				   	  "er. What's the heat death of the universe like?")
 
 def solve_p1():
 	print(f"PART ONE\n--------\n")
