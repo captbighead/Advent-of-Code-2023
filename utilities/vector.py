@@ -48,7 +48,6 @@ class vector:
             self._surrounding = self.adjacents.union(self.diagonals)
         return self._surrounding
 
-
     def rotate_cw(self, steps):
         """Rotates the vector clockwise a number of 90-degree steps."""
         if steps % 4 == 0:
@@ -82,6 +81,22 @@ class vector:
             self._x // abs(self._x) if self._x else 0, 
             self._y // abs(self._y) if self._y else 0
         )
+
+    def congruent(self, width, height=None):
+        """Returns the vector (x % width, y % height).
+
+        This is the vector that corresponds to the point where our vector would 
+        be if it wrapped around a rectangular space with dimensions 'width' and 
+        'height'. If a height value is not specified, the width value is 
+        substituted in it's place (for square regions).
+
+        Args:
+            width (int): The value to mod-divide x by.
+            height (int, optional): The value to mod-divide y by. Defaults to x.
+        """
+        if height == None:
+            height = width
+        return vector(self.x % width, self.y % height)
 
     def __add__(self, other):
         return vector(self._x + other._x, self._y + other._y)

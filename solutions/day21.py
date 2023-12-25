@@ -35,23 +35,37 @@ def do_part_one_for(lines, steps=64):
 
 def do_part_two_for(lines):
 	DIM = len(lines)
-	grid_map = algos.vector_map_from_string_list(lines)
+	grid_map = algos.vector_map_from_string_list(lines, default_fn=lambda: "#")
 	all_plots = len([v for v in grid_map if grid_map[v] != "#"])
 	origin = vector(DIM // 2, DIM // 2)
 	target_steps = 26501365
 	tracked = {}
 
+	# It takes 131 steps to get from the center point to all the other center 
+	# points, and coincidentally, that's how long it takes for the first square
+	# to be entirely accessible (for the actual input). 
+
+	# This means that from every furthest point after 131 steps, it's 
+
+	# Figure out how long it takes to get to any space from the center. 
 	steps = 0
 	recent_steps = set([origin])
-	while len(tracked) != all_plots and recent_steps:
+	breakout = False
+	while len(tracked) != all_plots and recent_steps and not breakout:
 		steps += 1
 		next_steps = set()
 		for v in recent_steps:
 			for adj in v.adjacents:
+				if adj not in grid_map:
+					continue
 				if adj not in tracked and grid_map[adj.congruent(DIM)] != "#":
 					next_steps.add(adj)
 					tracked[adj] = steps
+
+		breakout = all([(u * 131) + origin in tracked for u in vector.UNIT_VECTORS()])
 		recent_steps = next_steps
+
+	print()
 	
 
 
