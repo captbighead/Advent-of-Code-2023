@@ -233,4 +233,4 @@ def solve_p2():
 		  f"ted is {results}\n")
 
 def print_header():
-	print("--- DAY 19: <TITLE GOES HERE> ---\n")
+	print("--- DAY 19: Aplenty ---\n")

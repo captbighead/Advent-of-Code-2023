@@ -298,6 +298,8 @@ def solve_p1():
 
 def solve_p2():
 	print(f"PART TWO\n--------\n")
+	print(f"Forewarning: This needs optimization!\n\n...Like, for real. Takes 8"
+	   	  f"0 minutes.\n")
 	print(f"Do it again, but without slopes!\n")
 
 	results = do_part_two_for(example_lines)

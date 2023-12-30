@@ -155,4 +155,4 @@ def solve_p2():
 	print(f"\tThe number of reachable plots is {results}\n")
 
 def print_header():
-	print("--- DAY 21: <TITLE GOES HERE> ---\n")
+	print("--- DAY 21: Step Counter ---\n")

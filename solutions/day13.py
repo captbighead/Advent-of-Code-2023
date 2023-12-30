@@ -121,6 +121,9 @@ def do_part_two_for(lines):
 	return summation
 
 def solve_p1():
+	print("Wuh-oh! Lost the solution for 13!\n")
+	return
+
 	print(f"PART ONE\n--------\n")
 	print(f"This is the prompt for Part One of the problem.\n")
 
@@ -134,6 +137,9 @@ def solve_p1():
 	print(f"\tThe <THING THEY WANT> is {results}\n")
 
 def solve_p2():
+	print("Wuh-oh! Lost the solution for 13!\n")
+	return
+
 	print(f"PART TWO\n--------\n")
 	print(f"This is the prompt for Part Two of the problem.\n")
 

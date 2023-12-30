@@ -196,17 +196,20 @@ def solve_p1():
 
 def solve_p2():
 	print(f"PART TWO\n--------\n")
+	print(f"Forewarning: This needs optimization!\n")
 	print(f"For each brick that you disintegrate, a number of bricks would fall"
        	  f". What is the sum of that number for each brick in the stack?\n")
 
 	results = do_part_two_for(example_lines)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe sum of rocks that would fall if you disintegrated each is {results}")
+	print(f"\tThe sum of rocks that would fall if you disintegrated each is "
+	   	  f"{results}")
 	print(f"\tWe expected: 7\n")
 
 	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe sum of rocks that would fall if you disintegrated each is "
+	   	  f"{results}\n")
 
 def print_header():
-	print("--- DAY 22: <TITLE GOES HERE> ---\n")
+	print("--- DAY 22: Sand Slabs ---\n")

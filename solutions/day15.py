@@ -88,6 +88,9 @@ def do_part_two_for(lines):
 
 
 def solve_p1():
+	print("Wuh-oh! Lost the solution for 15!\n")
+	return
+
 	print(f"PART ONE\n--------\n")
 	print(f"For part one, we're testing out a hashing function by returning the"
        	  f" sum of the hashes of the instructions.\n")
@@ -102,6 +105,9 @@ def solve_p1():
 	print(f"\tThe sum of the hash values is {results}\n")
 
 def solve_p2():
+	print("Wuh-oh! Lost the solution for 15!\n")
+	return
+
 	print(f"PART TWO\n--------\n")
 	print(f"Now we need to arrange and sort a series of lenses based on the ins"
        	  f"tructions.\n")

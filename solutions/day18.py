@@ -101,12 +101,12 @@ def solve_p1():
 
 	results = do_part_one_for(example_lines)
 	print(f"When we do part one for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
+	print(f"\tThe total cubes of lava that fit in the trench is {results}")
 	print(f"\tWe expected: 62\n")
 
 	results = do_part_one_for(input_lines)
 	print(f"When we do part one for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
+	print(f"\tThe total cubes of lava that fit in the trench is {results}")
 	print(f"\tWe expected: 52055 (because we've solved it before)\n")
 
 
@@ -116,12 +116,14 @@ def solve_p2():
 
 	results = do_part_two_for(example_lines)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
+	print(f"\tThe number of cubes of lava that can fit in the trench is "
+		  f"{results}")
 	print(f"\tWe expected: 952408144115\n")
 
 	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe number of cubes of lava that can fit in the trench is "
+		  f"{results}\n")
 
 def print_header():
-	print("--- DAY 18: <TITLE GOES HERE> ---\n")
+	print("--- DAY 18: Lavaduct Lagoon ---\n")

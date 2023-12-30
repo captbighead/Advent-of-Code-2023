@@ -93,6 +93,9 @@ def do_part_two_for(lines):
 	pass
 
 def solve_p1():
+	print("Wuh-oh! Lost the solution for 17!\n")
+	return
+
 	print(f"PART ONE\n--------\n")
 	print(f"Shortest path through grid where you can't go backwards, only left,"
 	   	  f" right or forwards, and you can only go 3 steps forward before a tu"
