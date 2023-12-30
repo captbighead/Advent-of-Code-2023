@@ -7,11 +7,6 @@ import os
 # Dynamically imports the solution files for the project, provided they exist.
 _SOLUTIONS = {}
 def import_solutions():
-    
-    print("--")
-    print(os.getcwd())
-    print("--")
-    
     global _SOLUTIONS
     for i in range(1, 26):
         if os.path.exists(f"solutions\\day{i}.py"):
@@ -19,7 +14,7 @@ def import_solutions():
                 _SOLUTIONS[i] = importlib.import_module(f"solutions.day{i}")
             except:
                 print(f"Failed to load the solution for problem {i} due to a sy"
-                      f"ntax error.")
+                      f"ntax error (or something).")
 import_solutions()
 
 def main():
@@ -66,6 +61,7 @@ def main():
             generate_blank_input_files()
             continue
             
+        # If it wasn't a hidden option, we actually run the dang thing:
         start_time = time.time()
         _SOLUTIONS[soln].print_header()
         _SOLUTIONS[soln].solve_p1()
@@ -124,10 +120,13 @@ def profile_solution():
         part = input(f"{part} is invalid. Choose a part (1, 2): ")
     part = int(part)
 
+    print(f"\nProfiling the solution for Problem {problem}, Part {part}:\n")
+
     profiler = cProfile.Profile()
     run_str = f"_SOLUTIONS[{problem}].solve_p{part}()"
     profiler.runctx(run_str, globals(), locals())
     profiler.print_stats(sort="tottime")
+    print()
 
 
 def generate_solution_files():
