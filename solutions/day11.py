@@ -95,29 +95,27 @@ def solve_p1():
 	print(f"This is the prompt for Part One of the problem.\n")
 
 	results = do_part_two_for(example_lines, 1)
-	#results = do_part_one_for(example_lines)
 	print(f"When we do part one for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
+	print(f"\tThe shortest path between every pair of galaxies is {results}")
 	print(f"\tWe expected: 374\n")
 
 	results = do_part_two_for(input_lines, 1)
 	print(f"When we do part one for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe shortest path between every pair of galaxies is {results}\n")
 
 def solve_p2():
 	print(f"PART TWO\n--------\n")
 	print(f"This is the prompt for Part Two of the problem.\n")
 
-
-
 	results = do_part_two_for(example_lines, 99)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
+	print(f"\tThe sum of the shortest paths between all galaxies is {results}")
 	print(f"\tWe expected: 8410\n")
 
 	results = do_part_two_for(input_lines, 999999)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe sum of the shortest paths between all galaxies is {results}"
+	   	  f"\n")
 
 def print_header():
 	print("--- DAY 11: Cosmic Expansion ---\n")

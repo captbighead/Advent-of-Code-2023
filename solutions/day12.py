@@ -78,11 +78,6 @@ def do_part_two_for(lines):
 		array += ("?" + array) * 4
 		arrs = arrangements(array, counts)
 		summation += arrs
-
-		if len(lines) < 10:
-			print(f"\t{arrs} arrangements for {array} {counts}")
-	if len(lines) < 10:
-		print()
 	return summation
 
 def solve_p1():

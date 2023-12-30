@@ -50,12 +50,12 @@ def solve_p1():
 
 	results = do_part_one_for(example_lines)
 	print(f"When we do part one for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
-	print(f"\tWe expected: <SOLUTION THEY WANT>\n")
+	print(f"\tThe score of the scratchcard is {results}")
+	print(f"\tWe expected: 13\n")
 
 	results = do_part_one_for(input_lines)
 	print(f"When we do part one for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe score of the scratchcard is {results}\n")
 
 def solve_p2():
 	print(f"PART TWO\n--------\n")
@@ -63,12 +63,12 @@ def solve_p2():
 
 	results = do_part_two_for(example_lines)
 	print(f"When we do part two for the example input:")
-	print(f"\tThe <THING THEY WANT> is {results}")
-	print(f"\tWe expected: <SOLUTION THEY WANT>\n")
+	print(f"\tThe number of scratchcards you end up with is {results}")
+	print(f"\tWe expected: 30\n")
 
 	results = do_part_two_for(input_lines)
 	print(f"When we do part two for the actual input:")
-	print(f"\tThe <THING THEY WANT> is {results}\n")
+	print(f"\tThe number of scratchcards you end up with is {results}\n")
 
 def print_header():
-	print("--- DAY 4: <TITLE GOES HERE> ---\n")
+	print("--- DAY 4: Scratchcards ---\n")
